@@ -3,14 +3,21 @@ package primitives
 import "github.com/ChainsAre2Tight/streebog/pkg/tables"
 
 func P(dst []uint64) {
-	var res = make([]uint64, 8)
-	for i := range 8 {
-		for j, index := 7, 8*i+7; j >= 0; j, index = j-1, index-1 {
-			kuda := tables.PBox[index]
-			main, add := kuda/8, (7-kuda%8)*8
-			res[main] += uint64(byte(dst[i])) << add
-			dst[i] >>= 8
-		}
+	var res [8]uint64
+
+	for i := range 64 {
+		srcBit := i
+		dstBit := tables.PBox[i]
+
+		srcWord := srcBit / 8
+		srcShift := (7 - (srcBit % 8)) * 8
+
+		dstWord := dstBit / 8
+		dstShift := (7 - (dstBit % 8)) * 8
+
+		b := byte(dst[srcWord] >> srcShift)
+		res[dstWord] |= uint64(b) << dstShift
 	}
-	copy(dst, res)
+
+	copy(dst, res[:])
 }
