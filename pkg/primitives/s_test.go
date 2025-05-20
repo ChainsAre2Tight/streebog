@@ -36,3 +36,12 @@ func TestS(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkS(b *testing.B) {
+	in := make([]uint64, 8)
+	copy(in, testdata.XK1m)
+
+	for b.Loop() {
+		primitives.S(in)
+	}
+}

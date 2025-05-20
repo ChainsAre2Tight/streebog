@@ -36,3 +36,21 @@ func TestStreebog512(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkSteebog512(b *testing.B) {
+	value := testdata.M2
+	var hash []byte
+	var err error
+	b.ReportAllocs()
+
+	for b.Loop() {
+		hash, err = streebog.Streebog512(value)
+		if err != nil {
+			b.Fatalf("Error: %s", err)
+		}
+	}
+
+	if len(hash) == 0 {
+		b.Fatalf("hash is too short")
+	}
+}

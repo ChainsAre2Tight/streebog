@@ -35,3 +35,12 @@ func TestP(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkP(b *testing.B) {
+	in := make([]uint64, 8)
+	copy(in, testdata.SXK1m)
+
+	for b.Loop() {
+		primitives.P(in)
+	}
+}

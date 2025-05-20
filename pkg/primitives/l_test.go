@@ -33,3 +33,12 @@ func TestL(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkL(b *testing.B) {
+	in := make([]uint64, 8)
+	copy(in, testdata.PSXK1m)
+
+	for b.Loop() {
+		primitives.L(in)
+	}
+}

@@ -42,3 +42,12 @@ func TestX(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkX(b *testing.B) {
+	in := make([]uint64, 8)
+	copy(in, testdata.K1)
+
+	for b.Loop() {
+		primitives.X(in, testdata.M)
+	}
+}

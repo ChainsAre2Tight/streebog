@@ -34,3 +34,26 @@ func TestRoundFunction(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkRoundFunction(b *testing.B) {
+	tt := []struct {
+		h, m, N, res []uint64
+	}{
+		{
+			h: testdata.Zero512,
+			m: testdata.M,
+			N: testdata.Zero512,
+		},
+	}
+	for _, td := range tt {
+		b.Run(
+			fmt.Sprintf("%0.16x / %0.16x / %0.16x", td.h, td.m, td.N),
+			func(b *testing.B) {
+				in := make([]uint64, 8)
+				for b.Loop() {
+					round.G(in, td.m, td.N)
+				}
+			},
+		)
+	}
+}
