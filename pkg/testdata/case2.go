@@ -37,7 +37,9 @@ var Case2_EPSILON_2 = []uint64{
 }
 
 var Case2_HASH_512 = []byte{}
+var Case2_HASH_256 = []byte{}
 
 func init() {
-	Case2_HASH_512, _ = hex.DecodeString("28fbc9bada033b1460642bdcddb90c3fb3e56c497ccd0f62b8a2ad4935e85f037613966de4ee00531ae60f3b5a47f8dae06915d5f2f194996fcabf2622e6881e")
+	Case2_HASH_512 = d("28fbc9bada033b1460642bdcddb90c3fb3e56c497ccd0f62b8a2ad4935e85f037613966de4ee00531ae60f3b5a47f8dae06915d5f2f194996fcabf2622e6881e")
+	Case2_HASH_256 = d("508f7e553c06501d749a66fc28c6cac0b005746d97537fa85d9e40904efed29d")
 }
