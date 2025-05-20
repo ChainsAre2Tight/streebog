@@ -21,7 +21,7 @@ func Digest(message []byte, iv []byte) ([]byte, error) {
 	summ := make([]uint64, 8)
 
 	// 2.1
-	for len(M) > 64 {
+	for len(M) >= 64 {
 		// 2.2
 		l := len(M) - 64
 		var temp []byte
