@@ -18,3 +18,20 @@ var Linear = [64]uint64{
 	0x70a6a56e2440598e, 0x3853dc371220a247, 0x1ca76e95091051ad, 0x0edd37c48a08a6d8,
 	0x07e095624504536c, 0x8d70c431ac02a736, 0xc83862965601dd1b, 0x641c314b2b8ee083,
 }
+
+var LinearLookup [8][256]uint64
+
+func init() {
+	for bytePos := range 8 {
+		for combination := range 256 {
+			var res uint64 = 0
+			for i := range 8 {
+				if combination&(128>>i) != 0 {
+					index := 8*bytePos + i
+					res ^= Linear[index]
+				}
+			}
+			LinearLookup[bytePos][combination] = res
+		}
+	}
+}
