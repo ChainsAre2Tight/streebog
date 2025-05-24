@@ -2,7 +2,6 @@ package streebog
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/ChainsAre2Tight/streebog/pkg/constants"
 	"github.com/ChainsAre2Tight/streebog/pkg/utils"
@@ -32,18 +31,14 @@ func hmac_common(K, T []byte, hashFunc func(message []byte) ([]byte, error)) ([]
 
 	k_ipad := utils.XORBytes(K, constants.IPAD)
 	k_ipad = append(k_ipad, T...)
-	slices.Reverse(k_ipad)
 	hash, err := hashFunc(k_ipad)
 	if err != nil {
 		return fail(fmt.Errorf("hash(K ^ ipad | T): %s", err))
 	}
-	slices.Reverse(hash)
 
 	k_opad := utils.XORBytes(K, constants.OPAD)
 	k_opad = append(k_opad, hash...)
-	slices.Reverse(k_opad)
 	hash2, err := hashFunc(k_opad)
-	slices.Reverse(hash2)
 	if err != nil {
 		return fail(fmt.Errorf("hash(K ^ opad | hash(K ^ ipad | T)): %s", err))
 	}

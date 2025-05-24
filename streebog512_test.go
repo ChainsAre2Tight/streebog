@@ -27,7 +27,9 @@ func TestStreebog512(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("test #%0.2d | %0.16x -> %0.16x", test, td.in[0:16], td.out[0:16]),
 			func(t *testing.T) {
+				slices.Reverse(td.in)
 				res, err := streebog.Streebog512(td.in)
+				slices.Reverse(td.out)
 				if err != nil {
 					t.Fatalf("error: %s", err)
 				}
@@ -71,8 +73,6 @@ func TestStreebog512Inverse(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("test #%0.2d | %0.16x -> %0.16x", test, td.in[0:16], td.out[0:16]),
 			func(t *testing.T) {
-				slices.Reverse(td.in)
-				slices.Reverse(td.out)
 				res, err := streebog.Streebog512(td.in)
 				if err != nil {
 					t.Fatalf("error: %s", err)
@@ -108,9 +108,7 @@ func TestBlocksized(t *testing.T) {
 	for i := 0; i < 64; i++ {
 		m[i] = byte(i)
 	}
-	slices.Reverse(m)
 	res, _ := streebog.Streebog512(m)
-	slices.Reverse(res)
 	if !bytes.Equal(res, []byte{
 		0x2a, 0xe5, 0x81, 0xf1, 0x8a, 0xe8, 0x5e, 0x35,
 		0x96, 0xc9, 0x36, 0xac, 0xbe, 0xf9, 0x10, 0xf2,
