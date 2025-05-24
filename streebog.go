@@ -12,7 +12,7 @@ func Streebog256(message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("streebog.Streebog256: %s", err)
 	}
-	return res[:32], nil
+	return res[32:], nil
 }
 
 func Streebog512(message []byte) ([]byte, error) {

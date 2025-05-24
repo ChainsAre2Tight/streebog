@@ -3,6 +3,7 @@ package streebog_test
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/ChainsAre2Tight/streebog"
@@ -25,7 +26,9 @@ func TestStreebog256(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("test #%0.2d | %0.16x -> %0.16x", test, td.in[0:16], td.out[0:16]),
 			func(t *testing.T) {
+				slices.Reverse(td.in)
 				res, err := streebog.Streebog256(td.in)
+				slices.Reverse(td.out)
 				if err != nil {
 					t.Fatalf("error: %s", err)
 				}

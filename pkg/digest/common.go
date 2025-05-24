@@ -2,6 +2,7 @@ package digest
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/ChainsAre2Tight/streebog/pkg/constants"
 	"github.com/ChainsAre2Tight/streebog/pkg/round"
@@ -19,6 +20,8 @@ func Digest(message []byte, iv []byte) ([]byte, error) {
 	}
 	N := make([]uint64, 8)
 	summ := make([]uint64, 8)
+
+	slices.Reverse(message)
 
 	// 2.1
 	for len(M) >= 64 {
@@ -61,5 +64,8 @@ func Digest(message []byte, iv []byte) ([]byte, error) {
 	// 3.6
 	round.G(h, summ, constants.Zeroes)
 
-	return utils.UintsToBytes(h), nil
+	b := utils.UintsToBytes(h)
+	slices.Reverse(b)
+
+	return b, nil
 }
