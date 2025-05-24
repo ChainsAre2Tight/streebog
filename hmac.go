@@ -29,6 +29,10 @@ func hmac_common(K, T []byte, hashFunc func(message []byte) ([]byte, error)) ([]
 		return nil, fmt.Errorf("streebog.hmac_common: %s", err)
 	}
 
+	if len(K) > 64 {
+		return fail(fmt.Errorf("exceeded maximum key length: (%d > 64)", len(K)))
+	}
+
 	k_ipad := utils.XORBytes(K, constants.IPAD)
 	k_ipad = append(k_ipad, T...)
 	hash, err := hashFunc(k_ipad)
