@@ -67,6 +67,7 @@ func TestHMAC512(t *testing.T) {
 			fmt.Sprintf("%x | %x -> %x", td.message, td.key, td.hmac),
 			func(t *testing.T) {
 				hash, err := streebog.HMAC512(td.key, td.message)
+
 				if err != nil {
 					t.Fatalf("Error: %s", err)
 				}
