@@ -1,6 +1,6 @@
 # Функция шеширования Стрибог (ГОСТ 34.11 - 2018)
 
-Проект реализует функции хеширования Стрибог с длинами хеш-кода 256 и 512 бит, а также HMAC, базирующиеся на этих функциях.
+Проект реализует функции хеширования Стрибог с длинами хеш-кода 256 и 512 бит, реализующий интерфейс hash.Hash.
 
 ## Установка
 
@@ -17,19 +17,17 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/ChainsAre2Tight/streebog"
 )
 
 func main() {
 	message := []byte("any-message")
-	hash, err := streebog.Streebog512(message)
-	if err != nil {
-		log.Fatalf("Error during hash computation: %s", err)
-	}
-	fmt.Printf("Hash: %x\n", hash)
+	hash := streebog.New(64)
+	hash.Write(message)
+	fmt.Printf("Hash: %x\n", hash.Sum(nil))
 }
+
 
 ```
 #### HMAC
@@ -37,8 +35,9 @@ func main() {
 package main
 
 import (
+	"crypto/hmac"
 	"fmt"
-	"log"
+	"hash"
 
 	"github.com/ChainsAre2Tight/streebog"
 )
@@ -46,11 +45,9 @@ import (
 func main() {
 	key := []byte("any-key")
 	message := []byte("any-message")
-	hash, err := streebog.HMAC256(key, message)
-	if err != nil {
-		log.Fatalf("Error during hmac computation: %s", err)
-	}
-	fmt.Printf("Hash: %x\n", hash)
+	h := hmac.New(func() hash.Hash { return streebog.New(32) }, key)
+	h.Write(message)
+	fmt.Printf("Hash: %x\n", h.Sum(nil))
 }
 ```
 ## Производительность
