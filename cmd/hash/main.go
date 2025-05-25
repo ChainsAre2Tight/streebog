@@ -11,21 +11,19 @@ import (
 )
 
 func main() {
+	h256 := streebog.New(32)
+	h512 := streebog.New(64)
 	reader := bufio.NewReader(os.Stdin)
+
 	fmt.Print("Enter text: ")
 	text, err := reader.ReadBytes('\n')
 	if err != nil {
-		log.Fatalf("Error during stdin decoding: %s", err)
+		log.Fatalf("Error: %s", err)
 	}
 	text = text[:len(text)-1]
-	hash, err := streebog.Streebog256(text)
-	if err != nil {
-		log.Fatalf("Error during 256 hash computation: %s", err)
-	}
-	fmt.Printf("Hash 256: %s\n", hex.EncodeToString(hash))
-	hash, err = streebog.Streebog512(text)
-	if err != nil {
-		log.Fatalf("Error during 512 hash computation: %s", err)
-	}
-	fmt.Printf("Hash 512: %s\n", hex.EncodeToString(hash))
+
+	h256.Write(text)
+	h512.Write(text)
+	fmt.Printf("Hash 256: %s\n", hex.EncodeToString(h256.Sum(nil)))
+	fmt.Printf("Hash 512: %s\n", hex.EncodeToString(h512.Sum(nil)))
 }
