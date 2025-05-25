@@ -5,16 +5,21 @@ import (
 	"fmt"
 )
 
-func BytesToUints(in []byte) ([]uint64, error) {
+func BytesToUints(in []byte, dst []uint64) {
 	if len(in) != 64 {
-		return nil, fmt.Errorf("utils.BytesToUints: unexpected slice length. Expected: 64, Got: %d", len(in))
+		panic(fmt.Errorf("utils.BytesToUints: unexpected in slice length. Expected: 64, Got: %d", len(in)))
 	}
-	res := make([]uint64, 8)
-	for i := range 8 {
-		res[i] = binary.BigEndian.Uint64(in[8*i : 8*i+8])
+	if len(dst) != 8 {
+		panic(fmt.Errorf("utils.BytesToUints: unexpected dst slice length. Expected: 8, Got: %d", len(in)))
 	}
-
-	return res, nil
+	dst[0] = binary.BigEndian.Uint64(in[0:8])
+	dst[1] = binary.BigEndian.Uint64(in[8:16])
+	dst[2] = binary.BigEndian.Uint64(in[16:24])
+	dst[3] = binary.BigEndian.Uint64(in[24:32])
+	dst[4] = binary.BigEndian.Uint64(in[32:40])
+	dst[5] = binary.BigEndian.Uint64(in[40:48])
+	dst[6] = binary.BigEndian.Uint64(in[48:56])
+	dst[7] = binary.BigEndian.Uint64(in[56:])
 }
 
 func UintsToBytes(in []uint64) []byte {
