@@ -7,8 +7,8 @@ import (
 )
 
 func S(dst []uint64) {
-	if len(dst) != 8 {
-		panic(fmt.Errorf("primitives.S: unexpected dst length. Expected: 8, Got: %d", len(dst)))
+	if l := len(dst); l != 8 {
+		panic(fmt.Errorf("primitives.S: unexpected dst length. Expected: 8, Got: %d", l))
 	}
 
 	for i := range 8 {

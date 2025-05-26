@@ -1,23 +1,28 @@
 package primitives
 
-import "github.com/ChainsAre2Tight/streebog/pkg/tables"
+import (
+	"encoding/binary"
+	"fmt"
+
+	"github.com/ChainsAre2Tight/streebog/pkg/tables"
+)
 
 func P(dst []uint64) {
-	var res [8]uint64
-
-	for i := range 64 {
-		srcBit := i
-		dstBit := tables.PBox[i]
-
-		srcWord := srcBit / 8
-		srcShift := (7 - (srcBit % 8)) * 8
-
-		dstWord := dstBit / 8
-		dstShift := (7 - (dstBit % 8)) * 8
-
-		b := byte(dst[srcWord] >> srcShift)
-		res[dstWord] |= uint64(b) << dstShift
+	if l := len(dst); l != 8 {
+		panic(fmt.Sprintf("primitives.P: unexpected dst length. Expected: 8, Got: %d", l))
 	}
 
-	copy(dst, res[:])
+	bytes := make([]byte, 64)
+	for i := range 8 {
+		binary.BigEndian.PutUint64(bytes[i*8:(i+1)*8], dst[i])
+	}
+
+	permuted := make([]byte, 64)
+	for i := range 64 {
+		permuted[i] = bytes[tables.PBox[i]]
+	}
+
+	for i := range 8 {
+		dst[i] = binary.BigEndian.Uint64(permuted[i*8 : (i+1)*8])
+	}
 }
