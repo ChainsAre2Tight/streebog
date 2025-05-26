@@ -107,3 +107,60 @@ func TestBehaviour(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestBehaviourAdvanced(t *testing.T) {
+	// fill block with distinct values
+	// block contains 1.5 blocks of distinct, ordered bytes
+	blocks := make([]byte, 96)
+	for i := range blocks {
+		blocks[i] = byte(i)
+	}
+
+	// write a message that is 1.5 blocks long
+	// remember sum
+	h := streebog.New(64)
+	h.Write(blocks[:96])
+	expected := h.Sum(nil)
+
+	t.Run("1.5 blocks", func(t *testing.T) {
+		// write a message that is 1 block long
+		// and then 0.5 blocks long
+		// sum must be equal to the first one
+		h := streebog.New(64)
+		h.Write(blocks[:64])
+		h.Write(blocks[64:96])
+		res := h.Sum(nil)
+
+		if !bytes.Equal(res, expected) {
+			t.FailNow()
+		}
+
+	})
+
+	t.Run("0.75+0.75", func(t *testing.T) {
+		// write a 0.75 block long message twice
+		// sum must be equal to the first one
+		h := streebog.New(64)
+		h.Write(blocks[:48])
+		h.Write(blocks[48:96])
+		res := h.Sum(nil)
+
+		if !bytes.Equal(res, expected) {
+			t.FailNow()
+		}
+	})
+
+	t.Run("0.5+0.5+0.5", func(t *testing.T) {
+		// write a 0.5 block long message thrice
+		// sum must be equal to the first one
+		h := streebog.New(64)
+		h.Write(blocks[:32])
+		h.Write(blocks[32:64])
+		h.Write(blocks[64:96])
+		res := h.Sum(nil)
+
+		if !bytes.Equal(res, expected) {
+			t.FailNow()
+		}
+	})
+}
