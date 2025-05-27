@@ -10,12 +10,13 @@ import (
 	"github.com/ChainsAre2Tight/streebog/pkg/utils"
 )
 
-var _ hash.Hash = (*Streebog)(nil)
+var _ hash.Hash = (*streebog)(nil)
 
-type Streebog struct {
+type streebog struct {
 	size int
 
-	// used to reverse message in current implementation
+	// used to store message chunks
+	// as they are passed into Write()
 	bufferMessage []byte
 
 	// buffers for Write()
@@ -30,36 +31,52 @@ type Streebog struct {
 	bufferOutSumm []uint64
 }
 
-func (h *Streebog) BlockSize() int {
+func (h *streebog) BlockSize() int {
 	return 64
 }
 
-func (h *Streebog) Size() int {
+func (h *streebog) Size() int {
 	return h.size
 }
-func New(size int) *Streebog {
+func New(size int) hash.Hash {
 	if size != 32 && size != 64 {
 		panic("invalid hash size")
 	}
-	res := &Streebog{
+	res := &streebog{
 		size: size,
 	}
 	res.Reset()
 	return res
 }
 
-func (h *Streebog) Write(p []byte) (n int, err error) {
-	h.bufferMessage = make([]byte, len(p))
-	copy(h.bufferMessage, p)
+func (h *streebog) Write(p []byte) (n int, err error) {
+
+	// got remembers the length op p to return it later
+	got := len(p)
+
+	fillBuffer := func() {
+		remaining := 64 - len(h.bufferMessage)
+
+		// this should never reallocate, cap(h.bufferMessage) must remain at 64
+		if remaining < len(p) {
+			h.bufferMessage = append(h.bufferMessage, p[:remaining]...)
+			p = p[remaining:]
+		} else {
+			h.bufferMessage = append(h.bufferMessage, p...)
+			p = p[len(p):]
+		}
+	}
+
+	fillBuffer()
 
 	// 2.1
-	var c = 0
-	for len(h.bufferMessage) >= 64 {
-		c += 64
+	// is length == 64 we have enough data in p to fill buffer
+	for len(h.bufferMessage) == 64 {
+
 		// 2.2
-		var temp []byte
-		temp, h.bufferMessage = h.bufferMessage[:64], h.bufferMessage[64:]
-		utils.BytesToUints(temp, h.bufferM)
+		utils.BytesToUints(h.bufferMessage, h.bufferM)
+		h.bufferMessage = h.bufferMessage[:0]
+		fillBuffer()
 
 		// 2.3
 		round.G(h.bufferH, h.bufferM, h.bufferN)
@@ -71,10 +88,10 @@ func (h *Streebog) Write(p []byte) (n int, err error) {
 		utils.AddInRing(h.bufferSumm, h.bufferM)
 	}
 
-	return c, nil
+	return got, nil
 }
 
-func (h *Streebog) Sum(b []byte) []byte {
+func (h *streebog) Sum(b []byte) []byte {
 	// 3.1
 	utils.BytesToUints(utils.PadBytes(h.bufferMessage), h.bufferM)
 
@@ -110,7 +127,7 @@ func (h *Streebog) Sum(b []byte) []byte {
 	return b
 }
 
-func (h *Streebog) Reset() {
+func (h *streebog) Reset() {
 	h.bufferH = make([]uint64, 8)
 	switch h.size {
 	case 32:
@@ -118,6 +135,8 @@ func (h *Streebog) Reset() {
 	case 64:
 		utils.BytesToUints(constants.IV512, h.bufferH)
 	}
+	h.bufferMessage = make([]byte, 0, 64)
+
 	h.bufferN = make([]uint64, 8)
 	h.bufferM = make([]uint64, 8)
 	h.bufferSumm = make([]uint64, 8)

@@ -245,3 +245,46 @@ func TestStreebogNew(t *testing.T) {
 		_ = streebog.New(48)
 	})
 }
+
+func TestBehaviourChunked48(t *testing.T) {
+	msg := make([]byte, 48)
+	for i := range msg {
+		msg[i] = byte(i)
+	}
+
+	h := streebog.New(64)
+	h.Write(msg)
+	expected := h.Sum(nil)
+
+	t.Run("2x24", func(t *testing.T) {
+		h := streebog.New(64)
+		h.Write(msg[:24])
+		h.Write(msg[24:])
+		res := h.Sum(nil)
+		if !bytes.Equal(res, expected) {
+			t.Fatalf("hash mismatch for 2x24: got %x, want %x", res, expected)
+		}
+	})
+
+	t.Run("4x12", func(t *testing.T) {
+		h := streebog.New(64)
+		for i := 0; i < 48; i += 12 {
+			h.Write(msg[i : i+12])
+		}
+		res := h.Sum(nil)
+		if !bytes.Equal(res, expected) {
+			t.Fatalf("hash mismatch for 4x12: got %x, want %x", res, expected)
+		}
+	})
+
+	t.Run("3x16", func(t *testing.T) {
+		h := streebog.New(64)
+		for i := 0; i < 48; i += 16 {
+			h.Write(msg[i : i+16])
+		}
+		res := h.Sum(nil)
+		if !bytes.Equal(res, expected) {
+			t.Fatalf("hash mismatch for 3x16: got %x, want %x", res, expected)
+		}
+	})
+}
