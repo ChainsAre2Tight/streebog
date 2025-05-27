@@ -1,7 +1,7 @@
 package constants
 
 var V512 = []uint64{
-	0, 0, 0, 0, 0, 0, 0, 512,
+	0x0002000000000000, 0, 0, 0, 0, 0, 0, 0,
 }
 
 var Zeroes = []uint64{

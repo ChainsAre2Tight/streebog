@@ -1,6 +1,7 @@
 package streebog
 
 import (
+	"encoding/binary"
 	"hash"
 	"slices"
 
@@ -50,16 +51,14 @@ func New(size int) *Streebog {
 func (h *Streebog) Write(p []byte) (n int, err error) {
 	h.bufferMessage = make([]byte, len(p))
 	copy(h.bufferMessage, p)
-	slices.Reverse(h.bufferMessage)
 
 	// 2.1
 	var c = 0
 	for len(h.bufferMessage) >= 64 {
 		c += 64
 		// 2.2
-		l := len(h.bufferMessage) - 64
 		var temp []byte
-		temp, h.bufferMessage = h.bufferMessage[l:], h.bufferMessage[:l]
+		temp, h.bufferMessage = h.bufferMessage[:64], h.bufferMessage[64:]
 		utils.BytesToUints(temp, h.bufferM)
 
 		// 2.3
@@ -87,7 +86,10 @@ func (h *Streebog) Sum(b []byte) []byte {
 	round.G(h.bufferOutH, h.bufferM, h.bufferOutN)
 
 	// 3.3
-	utils.AddInRing(h.bufferOutN, []uint64{0, 0, 0, 0, 0, 0, 0, uint64(len(h.bufferMessage) * 8)})
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(len(h.bufferMessage)*8))
+	slices.Reverse(buf)
+	utils.AddInRing(h.bufferOutN, []uint64{binary.BigEndian.Uint64(buf), 0, 0, 0, 0, 0, 0, 0})
 
 	// 3.4
 	utils.AddInRing(h.bufferOutSumm, h.bufferM)
@@ -100,9 +102,8 @@ func (h *Streebog) Sum(b []byte) []byte {
 
 	temp := utils.UintsToBytes(h.bufferOutH)
 	if h.size == 32 {
-		temp = temp[:32]
+		temp = temp[32:]
 	}
-	slices.Reverse(temp)
 
 	b = append(b, temp...)
 
