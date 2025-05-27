@@ -12,13 +12,31 @@ func S(dst []uint64) {
 	}
 
 	for i := range 8 {
-		var temp uint64
-		for byteIndex := 0; byteIndex < 8; byteIndex++ {
-			shift := (7 - byteIndex) * 8
-			b := byte(dst[i] >> shift)
-			sub := tables.DirectSbox[b]
-			temp |= uint64(sub) << shift
-		}
+		var temp uint64 = dst[i]
+		var subbed uint64 = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
+		subbed = tables.DirectSbox[temp&0xff]
+		temp >>= 8
+		temp |= subbed
 		dst[i] = temp
 	}
 }

@@ -21,6 +21,7 @@ var Linear = [64]uint64{
 
 var LinearLookup [8][256]uint64
 
+// TODO: bake
 func init() {
 	for bytePos := range 8 {
 		for combination := range 256 {
