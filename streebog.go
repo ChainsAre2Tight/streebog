@@ -1,6 +1,7 @@
 package streebog
 
 import (
+	"encoding/binary"
 	"hash"
 	"slices"
 
@@ -9,12 +10,12 @@ import (
 	"github.com/ChainsAre2Tight/streebog/pkg/utils"
 )
 
-var _ hash.Hash = (*Streebog)(nil)
+var _ hash.Hash = (*streebog)(nil)
 
-type Streebog struct {
+type streebog struct {
 	size int
 
-	// used to reverse message in current implementation
+	// used to store message chunks as they are passed into Write()
 	bufferMessage []byte
 
 	// buffers for Write()
@@ -27,40 +28,55 @@ type Streebog struct {
 	bufferOutH    []uint64
 	bufferOutN    []uint64
 	bufferOutSumm []uint64
+	bufferByte    []byte
 }
 
-func (h *Streebog) BlockSize() int {
+func (h *streebog) BlockSize() int {
 	return 64
 }
 
-func (h *Streebog) Size() int {
+func (h *streebog) Size() int {
 	return h.size
 }
-func New(size int) *Streebog {
+func New(size int) hash.Hash {
 	if size != 32 && size != 64 {
 		panic("invalid hash size")
 	}
-	res := &Streebog{
+	res := &streebog{
 		size: size,
 	}
 	res.Reset()
 	return res
 }
 
-func (h *Streebog) Write(p []byte) (n int, err error) {
-	h.bufferMessage = make([]byte, len(p))
-	copy(h.bufferMessage, p)
-	slices.Reverse(h.bufferMessage)
+func (h *streebog) Write(p []byte) (n int, err error) {
+
+	// got remembers the length of p to return it later
+	got := len(p)
+
+	fillBuffer := func() {
+		remaining := 64 - len(h.bufferMessage)
+
+		// this should never reallocate, cap(h.bufferMessage) must remain at 64
+		if remaining < len(p) {
+			h.bufferMessage = append(h.bufferMessage, p[:remaining]...)
+			p = p[remaining:]
+		} else {
+			h.bufferMessage = append(h.bufferMessage, p...)
+			p = p[len(p):]
+		}
+	}
+
+	fillBuffer()
 
 	// 2.1
-	var c = 0
-	for len(h.bufferMessage) >= 64 {
-		c += 64
+	// if length == 64 we have enough data in p to fill the buffer
+	for len(h.bufferMessage) == 64 {
+
 		// 2.2
-		l := len(h.bufferMessage) - 64
-		var temp []byte
-		temp, h.bufferMessage = h.bufferMessage[l:], h.bufferMessage[:l]
-		utils.BytesToUints(temp, h.bufferM)
+		utils.BytesToUints(h.bufferMessage, h.bufferM)
+		h.bufferMessage = h.bufferMessage[:0]
+		fillBuffer()
 
 		// 2.3
 		round.G(h.bufferH, h.bufferM, h.bufferN)
@@ -68,16 +84,17 @@ func (h *Streebog) Write(p []byte) (n int, err error) {
 		// 2.4
 		utils.AddInRing(h.bufferN, constants.V512)
 
-		// 2,5
+		// 2.5
 		utils.AddInRing(h.bufferSumm, h.bufferM)
 	}
 
-	return c, nil
+	return got, nil
 }
 
-func (h *Streebog) Sum(b []byte) []byte {
+func (h *streebog) Sum(b []byte) []byte {
 	// 3.1
-	utils.BytesToUints(utils.PadBytes(h.bufferMessage), h.bufferM)
+	utils.PadBytes(h.bufferMessage, h.bufferByte)
+	utils.BytesToUints(h.bufferByte, h.bufferM)
 
 	copy(h.bufferOutH, h.bufferH)
 	copy(h.bufferOutN, h.bufferN)
@@ -87,7 +104,10 @@ func (h *Streebog) Sum(b []byte) []byte {
 	round.G(h.bufferOutH, h.bufferM, h.bufferOutN)
 
 	// 3.3
-	utils.AddInRing(h.bufferOutN, []uint64{0, 0, 0, 0, 0, 0, 0, uint64(len(h.bufferMessage) * 8)})
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(len(h.bufferMessage)*8))
+	slices.Reverse(buf)
+	utils.AddInRing(h.bufferOutN, []uint64{binary.BigEndian.Uint64(buf), 0, 0, 0, 0, 0, 0, 0})
 
 	// 3.4
 	utils.AddInRing(h.bufferOutSumm, h.bufferM)
@@ -98,18 +118,17 @@ func (h *Streebog) Sum(b []byte) []byte {
 	// 3.6
 	round.G(h.bufferOutH, h.bufferOutSumm, constants.Zeroes)
 
-	temp := utils.UintsToBytes(h.bufferOutH)
+	utils.UintsToBytes(h.bufferOutH, h.bufferByte)
 	if h.size == 32 {
-		temp = temp[:32]
+		h.bufferByte = h.bufferByte[32:]
 	}
-	slices.Reverse(temp)
 
-	b = append(b, temp...)
+	b = append(b, h.bufferByte...)
 
 	return b
 }
 
-func (h *Streebog) Reset() {
+func (h *streebog) Reset() {
 	h.bufferH = make([]uint64, 8)
 	switch h.size {
 	case 32:
@@ -117,6 +136,8 @@ func (h *Streebog) Reset() {
 	case 64:
 		utils.BytesToUints(constants.IV512, h.bufferH)
 	}
+	h.bufferMessage = make([]byte, 0, 64)
+
 	h.bufferN = make([]uint64, 8)
 	h.bufferM = make([]uint64, 8)
 	h.bufferSumm = make([]uint64, 8)
@@ -124,4 +145,5 @@ func (h *Streebog) Reset() {
 	h.bufferOutH = make([]uint64, 8)
 	h.bufferOutN = make([]uint64, 8)
 	h.bufferOutSumm = make([]uint64, 8)
+	h.bufferByte = make([]byte, 64)
 }

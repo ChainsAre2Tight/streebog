@@ -2,16 +2,21 @@ package utils
 
 import "fmt"
 
-func PadBytes(in []byte) []byte {
-	if len(in) > 64 {
-		panic(fmt.Errorf("utils.Pad: unexpected slice length: expected: <64, got: %d", len(in)))
+func PadBytes(in []byte, dst []byte) []byte {
+	if l := len(in); l > 64 {
+		panic(fmt.Errorf("utils.Pad: unexpected in slice length: expected: <64, got: %d", l))
 	}
-	res := make([]byte, 64)
-	var c = 63
-	for i := len(in) - 1; i >= 0; i-- {
-		res[c] = in[i]
-		c--
+	if l := len(dst); l != 64 {
+		panic(fmt.Errorf("utils.Pad: unexpected dst slice length: expected: 64, got: %d", l))
 	}
-	res[c] = 1
-	return res
+
+	for i := range dst {
+		dst[i] = 0
+	}
+
+	copy(dst, in)
+	if len(in) < 64 {
+		dst[len(in)] = 1
+	}
+	return dst
 }

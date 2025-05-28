@@ -28,9 +28,9 @@ func TestX(t *testing.T) {
 			c: testdata.K1xC1,
 		},
 	}
-	for _, td := range tt {
+	for test, td := range tt {
 		t.Run(
-			fmt.Sprintf("%0.16x ^ %0.16x -> %0.16x", td.a, td.b, td.c),
+			fmt.Sprintf("Test: %02d | %0.16x ^ %0.16x -> %0.16x", test, td.a, td.b, td.c),
 			func(t *testing.T) {
 				res := make([]uint64, 8)
 				copy(res, td.a)

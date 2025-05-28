@@ -13,31 +13,23 @@ func init() {
 }
 
 var M2_chunk_1 = []uint64{
-	0xfbeafaebef20fffb, 0xf0e1e0f0f520e0ed,
-	0x20e8ece0ebe5f0f2, 0xf120fff0eeec20f1,
-	0x20faf2fee5e2202c, 0xe8f6f3ede220e8e6,
-	0xeee1e8f0f2d1202c, 0xe8f0f2e5e220e5d1,
+	0xd1e520e2e5f2f0e8, 0x2c20d1f2f0e8e1ee, 0xe6e820e2edf3f6e8, 0x2c20e2e5fef2fa20,
+	0xf120eceef0ff20f1, 0xf2f0e5ebe0ece820, 0xede020f5f0e0e1f0, 0xfbff20efebfaeafb,
 }
 
 var Case2_EPSILON_1 = []uint64{
-	0xfbeafaebef20fffb, 0xf0e1e0f0f520e0ed,
-	0x20e8ece0ebe5f0f2, 0xf120fff0eeec20f1,
-	0x20faf2fee5e2202c, 0xe8f6f3ede220e8e6,
-	0xeee1e8f0f2d1202c, 0xe8f0f2e5e220e5d1,
+	0xd1e520e2e5f2f0e8, 0x2c20d1f2f0e8e1ee, 0xe6e820e2edf3f6e8, 0x2c20e2e5fef2fa20,
+	0xf120eceef0ff20f1, 0xf2f0e5ebe0ece820, 0xede020f5f0e0e1f0, 0xfbff20efebfaeafb,
 }
 
 var M2_chunk_2 = []uint64{
-	0x0000000000000000, 0x0000000000000000,
-	0x0000000000000000, 0x0000000000000000,
-	0x0000000000000000, 0x0000000000000000,
-	0x0000000000000001, 0xfbe2e5f0eee3c820,
+	0x20c8e3eef0e5e2fb, 0x0100000000000000, 0x0000000000000000, 0x0000000000000000,
+	0x0000000000000000, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000,
 }
 
 var Case2_EPSILON_2 = []uint64{
-	0xfbeafaebef20fffb, 0xf0e1e0f0f520e0ed,
-	0x20e8ece0ebe5f0f2, 0xf120fff0eeec20f1,
-	0x20faf2fee5e2202c, 0xe8f6f3ede220e8e6,
-	0xeee1e8f0f2d1202e, 0xe4d3d8d6d104adf1,
+	0xf1ad04d1d6d8d3e4, 0x2e20d1f2f0e8e1ee, 0xe6e820e2edf3f6e8, 0x2c20e2e5fef2fa20,
+	0xf120eceef0ff20f1, 0xf2f0e5ebe0ece820, 0xede020f5f0e0e1f0, 0xfbff20efebfaeafb,
 }
 
 var Case2_HASH_512 = []byte{}
