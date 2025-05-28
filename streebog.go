@@ -15,8 +15,7 @@ var _ hash.Hash = (*streebog)(nil)
 type streebog struct {
 	size int
 
-	// used to store message chunks
-	// as they are passed into Write()
+	// used to store message chunks as they are passed into Write()
 	bufferMessage []byte
 
 	// buffers for Write()
@@ -51,7 +50,7 @@ func New(size int) hash.Hash {
 
 func (h *streebog) Write(p []byte) (n int, err error) {
 
-	// got remembers the length op p to return it later
+	// got remembers the length of p to return it later
 	got := len(p)
 
 	fillBuffer := func() {
@@ -70,7 +69,7 @@ func (h *streebog) Write(p []byte) (n int, err error) {
 	fillBuffer()
 
 	// 2.1
-	// is length == 64 we have enough data in p to fill buffer
+	// if length == 64 we have enough data in p to fill the buffer
 	for len(h.bufferMessage) == 64 {
 
 		// 2.2
@@ -84,7 +83,7 @@ func (h *streebog) Write(p []byte) (n int, err error) {
 		// 2.4
 		utils.AddInRing(h.bufferN, constants.V512)
 
-		// 2,5
+		// 2.5
 		utils.AddInRing(h.bufferSumm, h.bufferM)
 	}
 
