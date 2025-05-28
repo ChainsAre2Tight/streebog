@@ -128,6 +128,30 @@ func BenchmarkStreebog(b *testing.B) {
 	}
 }
 
+func BenchmarkStreebogWrite(b *testing.B) {
+	h := streebog.New(64)
+	src := make([]byte, 65)
+	rand.Read(src)
+
+	for b.Loop() {
+		h.Write(src)
+	}
+}
+
+func BenchmarkStreebogSum(b *testing.B) {
+	h := streebog.New(64)
+	src := make([]byte, 65)
+	rand.Read(src)
+	h.Write(src)
+
+	r := make([]byte, 0, 64)
+
+	for b.Loop() {
+		h.Sum(r)
+		r = r[:0]
+	}
+}
+
 func TestBehaviour(t *testing.T) {
 	h := streebog.New(64)
 

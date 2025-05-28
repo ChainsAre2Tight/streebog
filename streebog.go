@@ -28,6 +28,7 @@ type streebog struct {
 	bufferOutH    []uint64
 	bufferOutN    []uint64
 	bufferOutSumm []uint64
+	bufferByte    []byte
 }
 
 func (h *streebog) BlockSize() int {
@@ -92,7 +93,8 @@ func (h *streebog) Write(p []byte) (n int, err error) {
 
 func (h *streebog) Sum(b []byte) []byte {
 	// 3.1
-	utils.BytesToUints(utils.PadBytes(h.bufferMessage), h.bufferM)
+	utils.PadBytes(h.bufferMessage, h.bufferByte)
+	utils.BytesToUints(h.bufferByte, h.bufferM)
 
 	copy(h.bufferOutH, h.bufferH)
 	copy(h.bufferOutN, h.bufferN)
@@ -116,12 +118,12 @@ func (h *streebog) Sum(b []byte) []byte {
 	// 3.6
 	round.G(h.bufferOutH, h.bufferOutSumm, constants.Zeroes)
 
-	temp := utils.UintsToBytes(h.bufferOutH)
+	utils.UintsToBytes(h.bufferOutH, h.bufferByte)
 	if h.size == 32 {
-		temp = temp[32:]
+		h.bufferByte = h.bufferByte[32:]
 	}
 
-	b = append(b, temp...)
+	b = append(b, h.bufferByte...)
 
 	return b
 }
@@ -143,4 +145,5 @@ func (h *streebog) Reset() {
 	h.bufferOutH = make([]uint64, 8)
 	h.bufferOutN = make([]uint64, 8)
 	h.bufferOutSumm = make([]uint64, 8)
+	h.bufferByte = make([]byte, 64)
 }
